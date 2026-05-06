@@ -27,3 +27,8 @@ args = "cd Tarea2_Estructura_de_Datos && gcc -o tarea2_app tarea2.c tdas/extra.c
 
 [workflows.workflow.metadata]
 outputType = "console"
+
+[deployment]
+deploymentTarget = "vm"
+run = ["bash", "-c", "cd Tarea2_Estructura_de_Datos && ./tarea2_app"]
+build = ["bash", "-c", "cd Tarea2_Estructura_de_Datos && gcc -o tarea2_app tarea2.c tdas/extra.c tdas/list.c tdas/map.c && mkdir -p data && cp Top1500.csv data/"]
