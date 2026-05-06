@@ -1,0 +1,29 @@
+[agent]
+expertMode = true
+stack = "BEST_EFFORT_FALLBACK"
+
+[nix]
+channel = "stable-25_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd Tarea2_Estructura_de_Datos && gcc -o tarea2_app tarea2.c tdas/extra.c tdas/list.c tdas/map.c && mkdir -p data && cp Top1500.csv data/ && ./tarea2_app"
+
+[workflows.workflow.metadata]
+outputType = "console"
