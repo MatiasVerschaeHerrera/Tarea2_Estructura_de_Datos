@@ -269,6 +269,19 @@ data/Top1500.csv
 - Recomendaciones automáticas
 
 ---
+# Contribuciones por Integrante
+
+## Matias Verschae Herrera
+- Implementación de buscarPorCategoria
+- Implementación de buscarPorDirector
+- Implementación de buscarPorDecada
+- Corrección de errores de compilación
+
+## Mathias Donoso Tapia
+- Implementación de buscarPorGeneroYDecada
+- Implementación de Watchlist (agregar, eliminar, mostrar)
+- Implementación de calificarPelicula
+- Estructura del struct Film y Calificacion
 
 # Conclusión
 
