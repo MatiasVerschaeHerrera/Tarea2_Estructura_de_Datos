@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 typedef struct{
     char usuario[100];
@@ -35,30 +36,16 @@ void mostrarMenuPrincipal() {
   puts("8) Salir");
 }
 
-/**
- * Compara dos claves de tipo string para determinar si son iguales.
- * Esta función se utiliza para inicializar mapas con claves de tipo string.
- *
- * @param key1 Primer puntero a la clave string.
- * @param key2 Segundo puntero a la clave string.
- * @return Retorna 1 si las claves son iguales, 0 de lo contrario.
- */
 int is_equal_str(void *key1, void *key2) {
   return strcmp((char *)key1, (char *)key2) == 0;
 }
 
-/**
- * Compara dos claves de tipo entero para determinar si son iguales.
- * Esta función se utiliza para inicializar mapas con claves de tipo entero.
- *
- * @param key1 Primer puntero a la clave entera.
- * @param key2 Segundo puntero a la clave entera.
- * @return Retorna 1 si las claves son iguales, 0 de lo contrario.
- */
+
 int is_equal_int(void *key1, void *key2) {
   return *(int *)key1 == *(int *)key2; // Compara valores enteros directamente
 }
 
+// Esta funcion muestra toda la informacion de cada pelicula
 void mostrarPelicula(Film *peli){
   printf("ID: %s.\n", peli->id);
   printf("Titulo: %s.\n", peli->title);
@@ -88,6 +75,15 @@ void mostrarPelicula(Film *peli){
   printf("========================================\n");
 }
 
+// Esta funcion modifica la palabra para que quede igual que en el csv, y permita al usuario que escriba las palabras sin restricciones
+void normalizarPalabra(char *str){
+  if(str == NULL || str[0] == '\0') return;
+  str[0] = toupper(str[0]);
+  for(int i = 1; str[i] != '\0'; i++){
+    if(str[i-1] == ' ') str[i] = toupper(str[i]);
+    else str[i] = tolower(str[i]);
+  }
+}
 
 /**
  * Carga películas desde un archivo CSV y las almacena en un mapa por ID.
@@ -172,6 +168,9 @@ void buscarPorCategoria(Map *pelis_bygenres){
   printf("Ingrese la categoria de la película: ");
   scanf(" %[^\n]", categoria); // Lee la categoria del teclado
 
+  // Escribo la palabra en el mismo formato del archivo (primera letra mayuscula, y las demas minusculas)
+  normalizarPalabra(categoria);
+  
   MapPair *pair = map_search(pelis_bygenres, categoria);
   if(pair == NULL){
     printf("No se encontrar peliculas del genero: '%s'\n", categoria);
@@ -189,18 +188,22 @@ void buscarPorCategoria(Map *pelis_bygenres){
   printf("Total: %d pelicula(s) encontrada(s).\n", count);
 }
 
+// Esta funcion busca las peliculas del director que ingresa el usuario
 void buscarPorDirector(Map *pelis_bydirector){
   limpiarPantalla();
   char director[100];
   printf("Ingrese el nombre del director: ");
   scanf(" %[^\n]", director);
+  normalizarPalabra(director);
 
+  // si no encuentra da un mensaje de error
   MapPair *pair = map_search(pelis_bydirector, director);
   if(pair == NULL){
     printf("No se encontrar peliculas del director: '%s'\n", director);
     return;
   }
 
+  // si encuentra muestra todas las peliculas
   List *lista = (List*) pair->value;
   Film *peli = list_first(lista);
   int count = 0;
@@ -212,51 +215,57 @@ void buscarPorDirector(Map *pelis_bydirector){
   printf("Total: %d pelicula(s) encontrada(s).\n", count);
 }
 
+// Esta funcion busca todas las peliculas segun la decada que ingreso el usuarip
 void buscarPorDecada(Map *pelis_byid){
   limpiarPantalla();
   int anio;
   printf("Ingrese el año de incio de la década (ej: 1990): ");
   scanf(" %d", &anio);
 
-  int decadaInicio = (anio/10) * 10;
-  int decadaFin = decadaInicio + 9;
-  printf("Mostrando peliculas de %d a %d:\n", decadaInicio, decadaFin);
+  printf("Mostrando peliculas de %d a %d:\n", anio, anio+9);
   printf("========================================");
 
+  //busco las peliculas que se encuentran en la decada y las muestro con su informacion
   MapPair *pair = map_first(pelis_byid);
   int count = 0;
   while(pair != NULL){
     Film *peli = (Film*) pair->value;
-    if(peli->year >= decadaInicio && peli->year <= decadaFin){
+    if(peli->year >= anio && peli->year <= anio+9){
       mostrarPelicula(peli);
       count++;
     }
     pair = map_next(pelis_byid);
   }
 
+  // si el contador se quedo en 0 significa que no se encontraron peliculas de esa decada
   if(count == 0){
     printf("No se encontrar peliculas en esa decada.\n");
   }
   else{
-    printf("Total: %d pelicula(s) encontra(s).\n", count);
+    printf("Total: %d pelicula(s) encontrada(s).\n", count);
   }
 }
 
-//FUNCIÓN 5(PREGUNTA)
+//FUNCIÓN 5
+// Esta funcion hace una doble busqueda, primero sobre el genero y luego sobre la decada
 void buscarPorGeneroYDecada(Map* pelis_bygenres){
   limpiarPantalla();
   char generoBuscado[100];
   int decada;
   printf("\nIngrese genero: ");
   scanf(" %[^\n]", generoBuscado);
+  normalizarPalabra(generoBuscado);
   printf("Ingrese decada (ej: 1990): ");
   scanf("%d", &decada);
+
+  // Busca si hay peliculas con el genero ingresado
   MapPair *aux = map_search(pelis_bygenres, generoBuscado);
   if(aux == NULL){
     printf("No se encontraron peliculas con el genero: '%s'.\n", generoBuscado);
     return;
   }
 
+  // Si encuentra peliculas con el genero pasa a ver si hay peliculas de la epoca ingresada con ese genero
   List *lista = (List*) aux->value;
   Film *peli = list_first(lista);
   int count = 0;
@@ -277,20 +286,22 @@ void buscarPorGeneroYDecada(Map* pelis_bygenres){
 }
 
 //FUNCION 6(PREGUNTA)
-
+// Esta funcion agrega a la watchlist del usurio la pelicula que quiere ver
 void agregarWatchlist(Map* pelis_byid, List* watchlist) {
   limpiarPantalla();
   char idBuscado[100];
   printf("Ingrese ID pelicula: ");
   scanf(" %[^\n]", idBuscado);
   MapPair *peliPair = map_search(pelis_byid, idBuscado);
-  
+
+  // si la pelicula que ingreso el usuario no existe le da error
   if(peliPair == NULL){
     printf("\nLa pelicula no existe.\n");
     return;
   }
   Film *peli = (Film*) peliPair->value;
   Film *aux = list_first(watchlist);
+  // Primero compara si la pelicula se encuentra dentro de la watchlist para que no hayan duplicados
   while(aux != NULL){
     if(strcmp(aux->id, peli->id) == 0){
       printf("La pelicula ya esta en su watchlist.\n");
@@ -298,10 +309,12 @@ void agregarWatchlist(Map* pelis_byid, List* watchlist) {
     }
     aux = list_next(watchlist);
   }
+  // Si no la encuentra dentro de la whatchlist, la agrega
   list_pushBack(watchlist, peli);
   printf("Pelicula '%s' agregada correctamente.\n", peli->title);
 }
 
+// Esta funcion elimina la pelicula ingresada a la watchlist
 void eliminarWatchlist(List* watchlist){
   limpiarPantalla();
   char idBuscado[100];
@@ -310,6 +323,7 @@ void eliminarWatchlist(List* watchlist){
   
   Film *peli = list_first(watchlist);
   while(peli != NULL){
+    // Si el ID ingresado coincide con un ID dentro de la watchlist, elimina la pelicula con ese ID
     if(strcmp(peli->id, idBuscado) == 0){
         list_popCurrent(watchlist);
         printf("Pelicula eliminada de la Watchlist.\n");
@@ -317,9 +331,11 @@ void eliminarWatchlist(List* watchlist){
       }
     peli = list_next(watchlist);
   }
+  // Si no encuentra el ID, da mensaje de error
   printf("\nLa pelicula no esta en watchlist.\n");
 }
 
+// Esta funcion muestra todas las peliculas dentro de la watchlist con sus respectivos datos
 void mostrarWatchlist(List* watchlist) {
   limpiarPantalla();
   Film* peli = list_first(watchlist);
@@ -335,7 +351,7 @@ void mostrarWatchlist(List* watchlist) {
 }
 
 //FUNCION 7 (PREGUNTA)
-
+// Esta funcion permite calificar las peliculas
 void calificarPelicula(Map* peli_byid) {
   limpiarPantalla();
   char idBuscado[100];
@@ -364,6 +380,7 @@ void calificarPelicula(Map* peli_byid) {
   }
   Calificacion *c = list_first(peli->Calificaciones);
     while(c != NULL){
+      // Si un usuario que ya habia calificado de la tarea trata de calificarla nuevamente, se le actualiza su nota
       if(strcmp(c->usuario, usuario) == 0){
           c->nota = nota;
           printf("Calificacion actualizada.\n");
