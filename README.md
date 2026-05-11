@@ -47,7 +47,7 @@ Tarea2_Estructura_de_Datos/
 Para compilar el proyecto:
 
 ```bash
-gcc -o tarea2_app tarea2.c tdas/extra.c tdas/list.c tdas/map.c
+cd Tarea2_Estructura_de_Datos && gcc tarea2.c tdas/*.c -o tarea2 && ./tarea2
 ```
 
 ---
@@ -57,7 +57,7 @@ gcc -o tarea2_app tarea2.c tdas/extra.c tdas/list.c tdas/map.c
 Ejecutar el programa:
 
 ```bash
-./tarea2_app
+./tarea2
 ```
 
 ---
